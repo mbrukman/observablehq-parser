@@ -178,7 +178,9 @@ export class CellParser extends Parser {
       // (But not an object expression or arrow function!)
       if (token.type === tt.parenL) {
         id = this.parseParenAndDistinguishExpression(true);
-        if (id.type === "ArrowFunctionExpression" || !this.eat(tt.eq)) {
+        if (id.type !== "ArrowFunctionExpression" && this.eat(tt.eq)) {
+          id = this.toAssignable(id, true);
+        } else {
           body = id;
           id = null;
         }
