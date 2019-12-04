@@ -163,6 +163,7 @@ export class CellParser extends Parser {
     this.O_function = 0;
     this.O_async = false;
     this.O_generator = false;
+    this.O_destructuring = null;
     this.strict = true;
     this.enterScope(SCOPE_FUNCTION | SCOPE_ASYNC | SCOPE_GENERATOR);
 
@@ -179,7 +180,7 @@ export class CellParser extends Parser {
       if (token.type === tt.parenL) {
         id = this.parseParenAndDistinguishExpression(true);
         if (id.type !== "ArrowFunctionExpression" && this.eat(tt.eq)) {
-          id = this.toAssignable(id, true);
+          id = this.toAssignable(id, true, this.O_destructuring);
         } else {
           body = id;
           id = null;
@@ -240,6 +241,10 @@ export class CellParser extends Parser {
     return node.type === "MutableExpression"
       ? node
       : super.toAssignable(node, isBinding, refDestructuringErrors);
+  }
+  checkExpressionErrors(refDestructuringErrors, andThrow) {
+    this.O_destructuring = refDestructuringErrors;
+    return super.checkExpressionErrors(refDestructuringErrors, andThrow);
   }
   checkUnreserved(node) {
     if (node.name === "viewof" || node.name === "mutable") {
